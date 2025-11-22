@@ -3,233 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نئون‌ورس: چرخه سرنوشت</title>
+    <title>نئون‌ورس: تکامل نهایی</title>
     
-    <!-- Fonts & Icons -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         :root {
-            --bg: #020408;
-            --panel: rgba(15, 23, 42, 0.85);
-            --primary: #00f0ff; /* Cyber Cyan */
-            --secondary: #7000ff; /* Electric Purple */
-            --accent: #ff0055; /* Neon Red */
+            --bg: #030508;
+            --panel: rgba(13, 17, 23, 0.9);
+            --primary: #00f3ff;
+            --secondary: #bd00ff;
+            --accent: #ff003c;
             --success: #00ff9d;
             --text: #e2e8f0;
+            --glass: 1px solid rgba(255,255,255,0.08);
             --font: 'Vazirmatn', sans-serif;
-            --glass-border: 1px solid rgba(255,255,255,0.1);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-
+        
         body {
             margin: 0; background: var(--bg); color: var(--text); font-family: var(--font);
-            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+            height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* --- Dynamic Background --- */
-        .verse-grid {
+        /* --- Background & Effects --- */
+        .cyber-bg {
             position: absolute; inset: 0; z-index: -1;
-            background-image: linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(112, 0, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            mask-image: radial-gradient(circle at center, black 30%, transparent 100%);
-            animation: gridPulse 10s infinite alternate;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(189, 0, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
         }
-        @keyframes gridPulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
-        
-        /* --- UI Components --- */
+        .scanline {
+            position: absolute; inset: 0; pointer-events: none; z-index: 0;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3) 51%);
+            background-size: 100% 4px;
+            opacity: 0.2;
+        }
+
+        /* --- Glitch Effect --- */
+        .glitch { position: relative; display: inline-block; }
+        .glitch::before, .glitch::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+        }
+        .glitch::before { left: 2px; text-shadow: -1px 0 #ff003c; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
+        .glitch::after { left: -2px; text-shadow: -1px 0 #00f3ff; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim2 5s infinite linear alternate-reverse; }
+        @keyframes glitch-anim {
+            0% { clip: rect(12px, 9999px, 32px, 0); } 20% { clip: rect(55px, 9999px, 88px, 0); }
+            40% { clip: rect(22px, 9999px, 6px, 0); } 60% { clip: rect(15px, 9999px, 66px, 0); }
+            80% { clip: rect(2px, 9999px, 81px, 0); } 100% { clip: rect(44px, 9999px, 12px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(2px, 9999px, 81px, 0); } 20% { clip: rect(15px, 9999px, 66px, 0); }
+            40% { clip: rect(22px, 9999px, 6px, 0); } 60% { clip: rect(55px, 9999px, 88px, 0); }
+            80% { clip: rect(12px, 9999px, 32px, 0); } 100% { clip: rect(64px, 9999px, 12px, 0); }
+        }
+
+        /* --- Layout & UI --- */
         header {
-            height: 64px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between;
-            background: rgba(2, 4, 8, 0.9); border-bottom: var(--glass-border); backdrop-filter: blur(12px); z-index: 100;
+            flex-shrink: 0; height: 60px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;
+            background: rgba(3, 5, 8, 0.9); border-bottom: var(--glass); backdrop-filter: blur(10px); z-index: 50;
         }
-        .brand { font-weight: 900; font-size: 22px; color: var(--primary); letter-spacing: 1px; display: flex; gap: 10px; align-items: center; text-shadow: 0 0 15px var(--primary); }
+        .brand { font-weight: 900; font-size: 20px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; text-shadow: 0 0 15px var(--primary); }
 
         .btn {
-            background: rgba(255,255,255,0.05); border: var(--glass-border); color: var(--text);
-            padding: 10px 18px; border-radius: 10px; cursor: pointer; font-family: var(--font); font-weight: 700;
-            transition: 0.2s; display: inline-flex; align-items: center; gap: 8px;
+            border: none; cursor: pointer; background: rgba(255,255,255,0.05); color: #fff;
+            padding: 10px 16px; border-radius: 8px; font-family: var(--font); font-weight: 700;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
-        .btn-primary { background: var(--primary); color: #000; border: none; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
-        .btn-primary:hover { background: #fff; box-shadow: 0 0 30px rgba(0, 240, 255, 0.6); }
-        .btn-danger { color: var(--accent); border-color: rgba(255, 0, 85, 0.3); background: rgba(255, 0, 85, 0.05); }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: var(--primary); color: #000; box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); border: none; }
+        .btn-danger { color: var(--accent); border-color: rgba(255,0,60,0.3); background: rgba(255,0,60,0.05); }
 
-        /* --- Views System --- */
-        .view { position: absolute; inset: 0; padding: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: 0.4s; transform: scale(0.98); }
+        /* --- Views --- */
+        .view { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: 0.4s; transform: scale(0.95); display: flex; flex-direction: column; }
         .view.active { opacity: 1; pointer-events: auto; transform: scale(1); }
 
         /* --- Setup View --- */
-        .setup-container {
-            max-width: 1000px; width: 100%; margin: 40px auto; padding: 0 20px;
-            display: grid; grid-template-columns: 350px 1fr; gap: 24px; height: 100%; overflow-y: auto;
+        .setup-wrap {
+            flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1000px; margin: 0 auto; width: 100%;
         }
-        @media(max-width: 800px) { .setup-container { grid-template-columns: 1fr; display: flex; flex-direction: column; } }
+        @media (max-width: 768px) { .setup-wrap { grid-template-columns: 1fr; display: flex; flex-direction: column; } }
 
-        .glass-card {
-            background: var(--panel); border: var(--glass-border); border-radius: 24px; padding: 24px;
-            display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        .panel { background: var(--panel); border: var(--glass); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+        .toggle-row:hover { background: rgba(255,255,255,0.06); }
+        
+        .player-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .player-row:last-child { border-bottom: none; }
+
+        /* --- Game View (Responsive) --- */
+        .game-wrap {
+            flex: 1; display: flex; flex-direction: row; height: calc(100% - 60px); overflow: hidden;
         }
-
-        .player-row {
-            display: flex; justify-content: space-between; align-items: center; padding: 12px;
-            background: rgba(255,255,255,0.03); border-radius: 12px; border-left: 3px solid transparent; transition: 0.2s;
-        }
-        .player-row:hover { background: rgba(255,255,255,0.06); border-left-color: var(--primary); }
-
-        /* --- Game View (The Dashboard) --- */
-        .game-layout {
-            display: grid; grid-template-columns: 300px 1fr 300px; gap: 0; height: calc(100vh - 64px);
-        }
-        @media(max-width: 1100px) { .game-layout { grid-template-columns: 260px 1fr 0px; } } /* Hide log on tablet */
-        @media(max-width: 768px) { .game-layout { grid-template-columns: 1fr; grid-template-rows: 1fr auto; } }
-
-        /* Sidebar: Leaderboard */
+        
         .sidebar {
-            background: rgba(0,0,0,0.4); border-left: var(--glass-border); border-right: var(--glass-border);
-            padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
-            backdrop-filter: blur(5px);
+            width: 280px; background: rgba(0,0,0,0.3); border-right: var(--glass);
+            display: flex; flex-direction: column; transition: 0.3s; z-index: 10;
         }
-        .sidebar-title { font-size: 14px; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-
-        .p-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-            border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 16px;
-            display: flex; align-items: center; gap: 12px; transition: 0.3s; position: relative; overflow: hidden;
-        }
-        .p-card.active { border-color: var(--primary); background: rgba(0, 240, 255, 0.05); box-shadow: 0 0 20px rgba(0, 240, 255, 0.1); transform: scale(1.02); }
-        .p-avatar { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: bold; background: #222; font-size: 18px; }
-        .p-info { flex: 1; }
-        .p-name { font-weight: bold; font-size: 14px; }
-        .p-stats { font-size: 11px; color: #888; display: flex; gap: 8px; margin-top: 4px; }
-        .p-badge { padding: 2px 6px; background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-        /* Center: The Arena */
+        .log-area { flex: 1; overflow-y: auto; padding: 15px; font-family: monospace; font-size: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .log-entry { padding: 6px 10px; background: rgba(255,255,255,0.03); border-radius: 4px; border-right: 2px solid var(--primary); animation: fadeIn 0.3s; }
+        
         .arena {
-            position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: radial-gradient(circle at center, rgba(0, 240, 255, 0.03) 0%, transparent 70%);
+            flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, rgba(0, 243, 255, 0.05) 0%, transparent 60%);
         }
+
+        /* Wheel Canvas */
+        .wheel-container {
+            position: relative; width: 90vmin; height: 90vmin; max-width: 450px; max-height: 450px;
+            filter: drop-shadow(0 0 40px rgba(189, 0, 255, 0.2));
+        }
+        canvas { width: 100%; height: 100%; border-radius: 50%; }
         
-        /* The Wheel */
-        .wheel-stage { position: relative; width: 360px; height: 360px; filter: drop-shadow(0 0 30px rgba(112, 0, 255, 0.4)); transition: 0.5s; }
-        @media(max-height: 700px) { .wheel-stage { width: 280px; height: 280px; } }
-        canvas { width: 100%; height: 100%; }
-        
-        .spin-trigger {
+        .spin-btn {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80px; height: 80px; border-radius: 50%; background: #fff; color: #000;
-            font-weight: 900; border: 4px solid #000; z-index: 10; font-size: 16px;
-            box-shadow: 0 0 50px #fff; transition: 0.2s; cursor: pointer;
+            width: 80px; height: 80px; border-radius: 50%;
+            background: #fff; color: #000; font-weight: 900; border: 4px solid #000;
+            font-size: 18px; box-shadow: 0 0 50px rgba(255,255,255,0.5);
+            z-index: 20; cursor: pointer; transition: 0.2s;
         }
-        .spin-trigger:hover { transform: translate(-50%, -50%) scale(1.1); }
-        .spin-trigger:active { transform: translate(-50%, -50%) scale(0.95); }
+        .spin-btn:hover { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 70px rgba(255,255,255,0.8); }
+        .spin-btn:active { transform: translate(-50%, -50%) scale(0.95); }
 
-        /* Right: Log */
-        .log-feed { font-family: monospace; font-size: 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: 100%; }
-        .log-item { padding: 8px; border-left: 2px solid #333; background: rgba(0,0,0,0.2); border-radius: 0 4px 4px 0; animation: fadeIn 0.3s; }
-        .log-item span { color: var(--primary); font-weight: bold; }
-        @keyframes fadeIn { from{opacity:0; transform:translateX(10px);} to{opacity:1; transform:translateX(0);} }
-
-        /* Action Overlay */
-        .action-modal {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 50;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: 0.3s;
+        /* Mobile Sidebar Handling */
+        @media (max-width: 900px) {
+            .game-wrap { flex-direction: column; }
+            .sidebar { 
+                width: 100%; height: auto; max-height: 0; overflow: hidden; border-right: none; border-top: var(--glass); position: absolute; bottom: 0; background: #0a0a0a;
+            }
+            .sidebar.open { max-height: 40vh; }
+            
+            .arena { padding-bottom: 60px; } /* Space for bottom bar */
+            
+            .mobile-controls {
+                display: flex; justify-content: space-around; padding: 10px; background: rgba(0,0,0,0.8);
+                position: absolute; bottom: 0; width: 100%; z-index: 30; border-top: var(--glass); backdrop-filter: blur(10px);
+            }
         }
-        .action-modal.open { opacity: 1; pointer-events: auto; }
         
-        .card-pop {
-            width: 90%; max-width: 480px; background: #0f111a; border: 1px solid var(--primary);
+        /* --- Modal --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.4s;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        
+        .modal-card {
+            width: 90%; max-width: 450px; background: #080a10; border: 1px solid var(--primary);
             border-radius: 24px; padding: 30px; text-align: center;
-            transform: translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 0 60px rgba(0, 240, 255, 0.15);
+            transform: translateY(50px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 80px rgba(0, 243, 255, 0.1);
+            position: relative; overflow: hidden;
         }
-        .action-modal.open .card-pop { transform: translateY(0); }
+        .modal-overlay.show .modal-card { transform: translateY(0); }
 
-        .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
-        .mode-btn {
-            height: 120px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-            cursor: pointer; transition: 0.3s;
+        .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .mode-card {
+            height: 110px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; gap: 8px;
         }
-        .mode-btn:hover { background: rgba(255,255,255,0.08); transform: scale(1.05); }
-        .mode-t:hover { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); }
-        .mode-d:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 20px rgba(255, 0, 85, 0.2); }
+        .mode-card:hover { transform: translateY(-5px); }
+        .mode-t:hover { border-color: var(--primary); background: rgba(0, 243, 255, 0.1); color: var(--primary); }
+        .mode-d:hover { border-color: var(--secondary); background: rgba(189, 0, 255, 0.1); color: var(--secondary); }
 
-        /* Skill Icons Mini */
-        .skill-mini { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 2px; }
-
-        /* Mobile Adjustments */
-        @media(max-width: 768px) {
-            .sidebar { display: none; } /* Hide sidebars on mobile, could move to bottom sheet if needed */
-            /* We will create a bottom bar for mobile stats */
-            .mobile-stats { display: flex; height: 100%; overflow-x: auto; padding: 10px; gap: 10px; align-items: center; background: #050505; border-top: 1px solid #222; }
+        /* Auto Mode Timer Bar */
+        .auto-timer {
+            height: 4px; background: var(--accent); width: 0%; margin-top: 10px;
+            transition: width 1s linear; opacity: 0;
         }
+        .auto-timer.active { opacity: 1; }
+
+        .hidden { display: none !important; }
+        .hidden-mobile { display: block; }
+        .visible-mobile { display: none; }
+        @media(max-width:900px){ .hidden-mobile{display:none;} .visible-mobile{display:flex;} }
+
     </style>
 </head>
 <body>
 
-    <div class="verse-grid"></div>
+    <div class="cyber-bg"></div>
+    <div class="scanline"></div>
 
+    <!-- HEADER -->
     <header>
-        <div class="brand">
-            <i data-lucide="aperture"></i> نئون‌ورس
-        </div>
+        <div class="brand"><i data-lucide="aperture"></i> <span class="glitch" data-text="NeonVerse">NEONVERSE</span></div>
         <div style="display:flex; gap:10px; align-items:center;">
-            <div id="bagBadge" style="font-size:11px; color:#888; border:1px solid #333; padding:4px 8px; border-radius:6px;">Fairness: 100%</div>
-            <button class="btn btn-danger" id="resetApp" title="ریست کامل" style="padding:8px;"><i data-lucide="trash-2" width="16"></i></button>
+            <div id="autoBadge" class="hidden" style="font-size:10px; color:var(--accent); border:1px solid var(--accent); padding:2px 6px; border-radius:4px; animation: pulse 1s infinite;">AUTO MODE</div>
+            <button id="toggleLog" class="btn btn-ghost visible-mobile"><i data-lucide="list"></i></button>
+            <button id="resetApp" class="btn btn-danger" style="padding:8px;"><i data-lucide="trash-2" width="16"></i></button>
         </div>
     </header>
 
     <!-- SETUP VIEW -->
     <div id="viewSetup" class="view active">
-        <div class="setup-container">
-            <!-- Settings Column -->
-            <div class="glass-card">
-                <h3 style="margin:0; color:var(--primary);"><i data-lucide="sliders"></i> اتاق کنترل</h3>
+        <div class="setup-wrap">
+            <!-- Settings -->
+            <div class="panel">
+                <h3 style="margin:0; display:flex; align-items:center; gap:8px; color:var(--primary);"><i data-lucide="cpu"></i> هسته مرکزی</h3>
                 
-                <label style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:12px; border-radius:12px;">
-                    <span>حالت آشوب (Auto)</span>
-                    <input type="checkbox" id="checkAuto" style="accent-color:var(--secondary); transform:scale(1.3);">
-                </label>
-                <div style="font-size:12px; color:#888;">انتخاب خودکار نوع بازی توسط سیستم هوشمند.</div>
+                <div class="toggle-row" onclick="el('checkAuto').click()">
+                    <div>
+                        <div style="font-weight:bold;">حالت آشوب (Auto Mode)</div>
+                        <div style="font-size:11px; color:#888;">سیستم به صورت خودکار سرنوشت را انتخاب می‌کند.</div>
+                    </div>
+                    <input type="checkbox" id="checkAuto" style="accent-color:var(--accent); transform:scale(1.3);">
+                </div>
 
-                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1);">
-                
+                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); width:100%;">
+
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <label class="btn" style="flex-direction:column; font-size:11px; padding:15px; height:auto;">
-                        <i data-lucide="file-text" color="var(--primary)"></i> حقیقت (<span id="cntT">0</span>)
+                    <label class="btn" style="flex-direction:column; font-size:12px; padding:15px; height:auto;">
+                        <i data-lucide="file-text" style="color:var(--primary)"></i> 
+                        <span>حقیقت (<span id="cntT">0</span>)</span>
                         <input type="file" hidden id="fileT" accept=".txt">
                     </label>
-                    <label class="btn" style="flex-direction:column; font-size:11px; padding:15px; height:auto;">
-                        <i data-lucide="zap" color="var(--accent)"></i> جرأت (<span id="cntD">0</span>)
+                    <label class="btn" style="flex-direction:column; font-size:12px; padding:15px; height:auto;">
+                        <i data-lucide="zap" style="color:var(--secondary)"></i> 
+                        <span>جرأت (<span id="cntD">0</span>)</span>
                         <input type="file" hidden id="fileD" accept=".txt">
                     </label>
                 </div>
-                <div style="font-size:11px; text-align:center; color:#666;">فایل .txt (هر خط یک سوال)</div>
+                <div style="font-size:10px; text-align:center; color:#555;">فایل txt (هر خط یک سوال) را انتخاب کنید</div>
             </div>
 
-            <!-- Players Column -->
-            <div class="glass-card" style="flex:1;">
+            <!-- Players -->
+            <div class="panel" style="flex:1;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h2 style="margin:0;">لیست مسافران</h2>
-                    <span id="pCount" style="background:var(--primary); color:#000; padding:2px 8px; border-radius:6px; font-weight:bold;">0</span>
+                    <h3 style="margin:0;">مسافران</h3>
+                    <span id="pCount" style="background:var(--primary); color:#000; padding:2px 8px; border-radius:6px; font-size:12px; font-weight:bold;">0</span>
                 </div>
 
-                <div style="display:flex; gap:12px;">
+                <div style="display:flex; gap:10px;">
                     <input type="text" id="inpName" placeholder="نام بازیکن..." style="flex:1; background:rgba(0,0,0,0.3); border:1px solid #444; padding:12px; border-radius:10px; color:#fff;">
                     <button id="btnAdd" class="btn btn-primary"><i data-lucide="plus"></i></button>
                 </div>
 
-                <div id="setupList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-                    <!-- Injected Players -->
+                <div id="setupList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:5px;">
+                    <!-- Players injected here -->
                 </div>
 
-                <button id="btnStart" class="btn btn-primary" style="width:100%; justify-content:center; padding:16px; font-size:18px; margin-top:10px;">
-                    ورود به ورتکس <i data-lucide="arrow-right"></i>
+                <button id="btnStart" class="btn btn-primary" style="width:100%; padding:16px; font-size:18px; margin-top:10px;">
+                    اجرای سیستم <i data-lucide="play"></i>
                 </button>
             </div>
         </div>
@@ -237,94 +262,84 @@
 
     <!-- GAME VIEW -->
     <div id="viewGame" class="view">
-        <div class="game-layout">
+        <div class="game-wrap">
             
-            <!-- LEFT: LEADERBOARD -->
-            <div class="sidebar" id="sidebarLeft">
-                <div class="sidebar-title"><i data-lucide="bar-chart-2" width="14"></i> وضعیت بازیکنان</div>
-                <div id="liveLeaderboard" style="display:flex; flex-direction:column; gap:10px;">
-                    <!-- Player Cards go here -->
+            <!-- LOG SIDEBAR (Desktop: Left, Mobile: Bottom Sheet) -->
+            <div class="sidebar" id="gameSidebar">
+                <div style="padding:15px; border-bottom:var(--glass); display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:12px; color:var(--primary); letter-spacing:1px;">SYSTEM LOG</span>
+                    <span id="bagInfo" style="font-size:10px; padding:2px 6px; border:1px solid #444; border-radius:4px;">Fairness: 100%</span>
+                </div>
+                <div id="gameLog" class="log-area">
+                    <div class="log-entry">سیستم آماده است...</div>
                 </div>
             </div>
 
-            <!-- CENTER: ARENA -->
+            <!-- ARENA -->
             <div class="arena">
-                <button id="btnExit" class="btn" style="position:absolute; top:16px; right:16px; font-size:12px; z-index:10; padding:6px 12px;">خروج</button>
+                <button id="btnBack" class="btn" style="position:absolute; top:20px; right:20px; z-index:10; padding:8px 12px; font-size:12px;">خروج</button>
                 
-                <div class="wheel-stage">
-                    <canvas id="wheelCanvas" width="400" height="400"></canvas>
-                    <button id="btnSpin" class="spin-trigger">SPIN</button>
+                <div class="wheel-container">
+                    <canvas id="wheelCanvas" width="450" height="450"></canvas>
+                    <button id="btnSpin" class="spin-btn">SPIN</button>
                     
-                    <!-- Pointer SVG -->
-                    <svg style="position:absolute; top:-20px; left:50%; transform:translateX(-50%); width:40px; filter:drop-shadow(0 4px 4px #000);" viewBox="0 0 50 50">
-                        <path d="M25 50 L10 10 L40 10 Z" fill="#ff0055" stroke="#fff" stroke-width="2"/>
+                    <!-- Pointer -->
+                    <svg style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); width:50px; filter:drop-shadow(0 5px 5px rgba(0,0,0,0.8));" viewBox="0 0 50 50">
+                        <path d="M25 50 L10 10 L40 10 Z" fill="#ff003c" stroke="#fff" stroke-width="3"/>
                     </svg>
                 </div>
             </div>
-
-            <!-- RIGHT: LOG -->
-            <div class="sidebar" id="sidebarRight">
-                <div class="sidebar-title"><i data-lucide="activity" width="14"></i> لاگ سیستم</div>
-                <div id="gameLog" class="log-feed">
-                    <div class="log-item" style="color:#888;">سیستم آماده است...</div>
-                </div>
-            </div>
-            
-            <!-- MOBILE STATS BAR (Visible only on mobile) -->
-            <div class="mobile-stats hidden-desktop" id="mobileStats" style="display:none;">
-                <!-- Injected horizontally -->
-            </div>
-
         </div>
+    </div>
 
-        <!-- ACTION MODAL -->
-        <div id="actionModal" class="action-modal">
-            <div class="card-pop">
-                <h1 id="modalName" style="margin:0; font-size:36px; color:var(--primary); text-shadow:0 0 20px var(--primary);">Player</h1>
-                <div style="display:flex; justify-content:center; gap:10px; margin-top:8px; color:#aaa; font-size:14px;">
-                    <span id="modalLvl">Lvl 1</span> • 
-                    <span id="modalXp">0 XP</span> • 
-                    <span id="modalScore" style="color:#fff;">0 PTS</span>
+    <!-- ACTION MODAL -->
+    <div id="actionModal" class="modal-overlay">
+        <div class="modal-card">
+            <div style="font-size:12px; color:#888; letter-spacing:2px; margin-bottom:5px;">TARGET ACQUIRED</div>
+            <h1 id="modalName" class="glitch" data-text="PLAYER" style="margin:0; font-size:40px; color:#fff;">PLAYER</h1>
+            
+            <div style="display:flex; justify-content:center; gap:15px; margin-top:10px; color:var(--primary); font-size:14px; font-family:monospace;">
+                <span id="modalLvl">Lvl 1</span> | <span id="modalScore">0 PTS</span>
+            </div>
+
+            <!-- Phase 1: Selection -->
+            <div id="phase1">
+                <div class="mode-grid">
+                    <div class="mode-card mode-t" onclick="Game.selectMode('t')">
+                        <i data-lucide="file-text" size="32"></i> <strong>حقیقت</strong>
+                    </div>
+                    <div class="mode-card mode-d" onclick="Game.selectMode('d')">
+                        <i data-lucide="zap" size="32"></i> <strong>جرأت</strong>
+                    </div>
                 </div>
+                <!-- Auto Mode Visualizer -->
+                <div id="autoBar" class="auto-timer"></div>
+                <div id="autoText" class="hidden" style="font-size:10px; color:var(--accent); margin-top:5px; animation:pulse 0.5s infinite;">SYSTEM HACKING...</div>
+            </div>
 
-                <!-- Phase 1 -->
-                <div id="phaseChoose" class="mode-grid">
-                    <div class="mode-btn mode-t" onclick="Game.selectMode('t')">
-                        <i data-lucide="file-text" size="32"></i>
-                        <strong>حقیقت</strong>
-                    </div>
-                    <div class="mode-btn mode-d" onclick="Game.selectMode('d')">
-                        <i data-lucide="zap" size="32"></i>
-                        <strong>جرأت</strong>
-                    </div>
+            <!-- Phase 2: Question -->
+            <div id="phase2" class="hidden" style="margin-top:20px;">
+                <div id="qText" style="min-height:120px; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(255,255,255,0.05); border-radius:16px; font-size:18px; line-height:1.6; border:1px dashed #555;">
+                    Loading...
                 </div>
-
-                <!-- Phase 2 -->
-                <div id="phaseExec" class="hidden" style="margin-top:20px;">
-                    <div id="qText" style="min-height:100px; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(255,255,255,0.05); border-radius:16px; font-size:18px; line-height:1.6;">
-                        Loading...
-                    </div>
-                    <div style="display:flex; gap:12px; margin-top:20px;">
-                        <button class="btn btn-danger" onclick="Game.resolve(false)" style="flex:1;">انصراف</button>
-                        <button class="btn btn-primary" onclick="Game.resolve(true)" style="flex:2;">انجام شد</button>
-                    </div>
+                <div style="display:flex; gap:12px; margin-top:20px;">
+                    <button class="btn btn-danger" onclick="Game.resolve(false)" style="flex:1;">انصراف</button>
+                    <button class="btn btn-primary" onclick="Game.resolve(true)" style="flex:2;">انجام شد</button>
                 </div>
             </div>
         </div>
     </div>
 
 <script>
-/**
- * NEONVERSE ENGINE v3.0
- */
-const COLORS = ['#00f0ff', '#7000ff', '#ff0055', '#00ff9d', '#ffaa00'];
+/* NEONVERSE CORE ENGINE v4.0 (Final) */
 const AUDIO = new (window.AudioContext || window.webkitAudioContext)();
+const COLORS = ['#00f3ff', '#bd00ff', '#ff003c', '#00ff9d', '#ffae00'];
 
 // --- Utils ---
 const el = id => document.getElementById(id);
 const uid = () => Math.random().toString(36).substr(2, 8);
 
-// --- Audio Sys ---
+// --- Sound Engine ---
 const SFX = {
     play(type) {
         if(AUDIO.state === 'suspended') AUDIO.resume();
@@ -334,75 +349,67 @@ const SFX = {
         const t = AUDIO.currentTime;
 
         if(type === 'tick') {
-            o.type = 'square'; o.frequency.setValueAtTime(800, t);
+            o.type = 'triangle'; o.frequency.setValueAtTime(600, t);
             g.gain.setValueAtTime(0.02, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.05);
             o.start(t); o.stop(t+0.05);
         } else if(type === 'win') {
-            o.type = 'sine'; o.frequency.setValueAtTime(400, t); o.frequency.linearRampToValueAtTime(800, t+0.3);
-            g.gain.setValueAtTime(0.1, t); g.gain.linearRampToValueAtTime(0, t+0.5);
-            o.start(t); o.stop(t+0.5);
+            o.type = 'sine'; o.frequency.setValueAtTime(300, t); o.frequency.linearRampToValueAtTime(600, t+0.3);
+            g.gain.setValueAtTime(0.1, t); g.gain.linearRampToValueAtTime(0, t+0.6);
+            o.start(t); o.stop(t+0.6);
+        } else if(type === 'auto') {
+            o.type = 'sawtooth'; o.frequency.setValueAtTime(100, t); 
+            g.gain.setValueAtTime(0.05, t); g.gain.linearRampToValueAtTime(0, t+0.2);
+            o.start(t); o.stop(t+0.2);
         }
     }
 };
 
-// --- Game State ---
+// --- State ---
 const State = {
-    players: [],
-    bag: [],
-    qT: [], qD: [],
-    settings: { auto: false },
-    active: null
+    players: [], bag: [], qT: [], qD: [],
+    settings: { auto: false }, active: null
 };
 
-// --- Wheel Renderer ---
+// --- Wheel ---
 const Wheel = {
     ctx: el('wheelCanvas').getContext('2d'),
-    angle: 0,
-    isSpinning: false,
+    angle: 0, isSpinning: false,
     
     draw() {
         const ctx = this.ctx;
-        const w = 400; 
-        const center = w/2;
-        const len = State.players.length;
+        const w = 450; const center = w/2; const len = State.players.length;
         ctx.clearRect(0,0,w,w);
         
         if(len === 0) return;
-
         const arc = (Math.PI*2) / len;
-        // -PI/2 to correct canvas 0-angle (3 o'clock) to top (12 o'clock)
-        const start = this.angle - (Math.PI/2);
+        const start = this.angle - (Math.PI/2); // Adjust 0 to top
 
         for(let i=0; i<len; i++) {
             const a = start + (i*arc);
             ctx.beginPath();
             ctx.moveTo(center, center);
             ctx.arc(center, center, center-10, a, a+arc);
-            ctx.fillStyle = State.players[i].color + '44'; // Transparent
+            ctx.fillStyle = State.players[i].color + '44';
             ctx.fill();
             ctx.strokeStyle = State.players[i].color;
             ctx.lineWidth = 2;
             ctx.stroke();
             
-            // Text
             ctx.save();
             ctx.translate(center, center);
             ctx.rotate(a + arc/2);
             ctx.textAlign = "right";
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 16px Vazirmatn";
+            ctx.font = "bold 18px Vazirmatn";
+            ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 4;
             ctx.fillText(State.players[i].name, center-30, 6);
             ctx.restore();
         }
         
-        // Center Hub
-        ctx.beginPath();
-        ctx.arc(center, center, 50, 0, Math.PI*2);
-        ctx.fillStyle = '#000';
-        ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 4;
-        ctx.stroke();
+        // Center Cap
+        ctx.beginPath(); ctx.arc(center, center, 50, 0, Math.PI*2);
+        ctx.fillStyle = '#000'; ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.stroke();
     },
 
     spinTo(id) {
@@ -414,47 +421,27 @@ const Wheel = {
         const len = State.players.length;
         const arc = (Math.PI*2) / len;
         
-        // Target: The center of the segment should align with Top (3PI/2 in canvas logic relative to rotation)
-        // Actually simpler: Total rotation needed to put segment i at top.
-        // Top is 270deg or 3PI/2.
-        // We need: currentRotation + delta = target.
-        
-        // Random rotations (5 to 8)
-        const spins = (Math.PI*2) * (5 + Math.random()*3);
-        
-        // Calculate alignment
-        // Segment i is at angle: i*arc. We want this to be at -PI/2 (top visual)
-        // So rotation should offset this.
+        // Calc target angle
+        const spins = (Math.PI*2) * (5 + Math.random()*3); // 5-8 spins
         const segmentCenter = (idx * arc) + (arc/2);
-        const targetAngle = (Math.PI*2) - segmentCenter - (Math.PI/2); 
+        const targetAngle = (Math.PI*2) - segmentCenter - (Math.PI/2);
         
-        // We add "spins" to "targetAngle".
-        // But we must respect current angle to be smooth.
         const currentNorm = this.angle % (Math.PI*2);
         let delta = (targetAngle - currentNorm + (Math.PI*2)) % (Math.PI*2);
         delta += spins;
 
-        // Animation
-        const dur = 4000;
-        const startT = performance.now();
-        const startA = this.angle;
+        const dur = 4500; const startT = performance.now(); const startA = this.angle;
         let lastTick = -1;
-
-        const ease = t => 1 - Math.pow(1 - t, 3); // Cubic out
+        const ease = t => 1 - Math.pow(1 - t, 3);
 
         const loop = (now) => {
             const p = Math.min((now - startT)/dur, 1);
             this.angle = startA + (delta * ease(p));
             this.draw();
             
-            // Ticks based on segment passing top
-            // A segment passes every 'arc' radians
             const totalRot = this.angle - startA;
             const ticks = Math.floor(totalRot / arc);
-            if(ticks > lastTick) {
-                SFX.play('tick');
-                lastTick = ticks;
-            }
+            if(ticks > lastTick) { SFX.play('tick'); lastTick = ticks; }
 
             if(p < 1) requestAnimationFrame(loop);
             else {
@@ -473,89 +460,91 @@ const Game = {
         if(!name.trim()) return;
         State.players.push({
             id: uid(), name: name.trim(),
-            score: 0, xp: 0, lvl: 1,
-            color: COLORS[State.players.length % COLORS.length],
-            skills: ['shield']
+            score: 0, lvl: 1,
+            color: COLORS[State.players.length % COLORS.length]
         });
-        UI.updateSetup();
-        Storage.save();
-        Wheel.draw();
+        UI.update(); Storage.save(); Wheel.draw();
     },
-    
     remove(id) {
         State.players = State.players.filter(p=>p.id!==id);
-        UI.updateSetup();
-        Storage.save();
-        Wheel.draw();
+        UI.update(); Storage.save(); Wheel.draw();
     },
-
     getWinner() {
-        // Bag Logic
         State.bag = State.bag.filter(id => State.players.find(p=>p.id===id));
         if(State.bag.length === 0) {
             State.bag = State.players.map(p=>p.id).sort(()=>Math.random()-0.5);
-            UI.log('سیستم: کیسه عدالت پر شد.');
+            UI.log('سیستم عدالت ریست شد.');
         }
         const wid = State.bag.pop();
-        el('bagBadge').innerText = `Fairness: ${Math.round((State.bag.length/State.players.length)*100)}%`;
+        el('bagInfo').innerText = `Fairness: ${Math.round((State.bag.length/State.players.length)*100)}%`;
         return wid;
     },
-
     spin() {
-        if(State.players.length < 2) return alert('بازیکن کم است!');
+        if(State.players.length < 2) return alert('حداقل ۲ بازیکن!');
         const wid = this.getWinner();
         State.active = State.players.find(p=>p.id===wid);
         Wheel.spinTo(wid);
     },
-
     onWin() {
         SFX.play('win');
-        confetti({
-            particleCount: 100, spread: 70,
-            colors: [State.active.color, '#ffffff']
-        });
-        UI.highlightCard(State.active.id);
-        UI.log(`نوبت: ${State.active.name}`);
+        confetti({ particleCount: 100, spread: 70, colors: [State.active.color, '#fff'] });
+        UI.log(`انتخاب شد: ${State.active.name}`);
         
-        // Open Modal
+        // Update Modal UI
         el('modalName').innerText = State.active.name;
+        el('modalName').setAttribute('data-text', State.active.name);
         el('modalName').style.color = State.active.color;
         el('modalLvl').innerText = `Lvl ${State.active.lvl}`;
-        el('modalXp').innerText = `${State.active.xp} XP`;
         el('modalScore').innerText = `${State.active.score} PTS`;
         
-        el('phaseChoose').classList.remove('hidden');
-        el('phaseExec').classList.add('hidden');
-        el('actionModal').classList.add('open');
-
+        // Reset Phases
+        el('phase1').classList.remove('hidden');
+        el('phase2').classList.add('hidden');
+        el('actionModal').classList.add('show');
+        
+        // Handle Auto Mode
+        const bar = el('autoBar');
+        const txt = el('autoText');
         if(State.settings.auto) {
+            bar.style.width = '0%';
+            bar.classList.add('active');
+            txt.classList.remove('hidden');
+            
+            // Trigger animation
+            setTimeout(() => { bar.style.width = '100%'; }, 50);
+            
+            // Exec
             setTimeout(() => {
+                SFX.play('auto');
                 this.selectMode(Math.random()>0.5 ? 't':'d');
-            }, 800);
+                bar.classList.remove('active');
+                bar.style.width = '0%';
+                txt.classList.add('hidden');
+            }, 2000); // 2s delay for drama
+        } else {
+            bar.classList.remove('active');
+            txt.classList.add('hidden');
         }
     },
-
     selectMode(m) {
         const pool = m==='t' ? State.qT : State.qD;
         const txt = pool.length ? pool[Math.floor(Math.random()*pool.length)] : `(بانک خالی)\nیک سوال ${m==='t'?'حقیقت':'جرأت'} بپرسید.`;
         
-        el('phaseChoose').classList.add('hidden');
-        el('phaseExec').classList.remove('hidden');
+        el('phase1').classList.add('hidden');
+        el('phase2').classList.remove('hidden');
         
         const qt = el('qText');
         qt.innerText = txt;
-        qt.style.color = m==='t' ? 'var(--primary)' : 'var(--accent)';
-        qt.style.borderColor = qt.style.color;
+        qt.style.borderColor = m==='t' ? 'var(--primary)' : 'var(--secondary)';
+        qt.style.color = m==='t' ? 'var(--primary)' : 'var(--secondary)';
         
-        UI.log(`${State.active.name} انتخاب کرد: ${m==='t'?'حقیقت':'جرأت'}`);
+        UI.log(`${State.active.name}: ${m==='t'?'حقیقت':'جرأت'}`);
     },
-
     resolve(ok) {
         if(ok) {
             State.active.score += 10;
-            State.active.xp += 5;
-            if(State.active.xp >= State.active.lvl * 15) {
-                State.active.xp = 0; State.active.lvl++;
+            if(State.active.score >= State.active.lvl * 50) {
+                State.active.lvl++;
                 UI.log(`لول آپ! ${State.active.name} -> Lvl ${State.active.lvl}`);
                 SFX.play('win');
             }
@@ -563,15 +552,15 @@ const Game = {
             State.active.score = Math.max(0, State.active.score - 5);
             UI.log(`${State.active.name} انصراف داد.`);
         }
-        el('actionModal').classList.remove('open');
+        el('actionModal').classList.remove('show');
         Storage.save();
-        UI.updateBoard();
+        UI.update();
     }
 };
 
-// --- UI Manager ---
+// --- UI ---
 const UI = {
-    updateSetup() {
+    update() {
         const l = el('setupList'); l.innerHTML = '';
         el('pCount').innerText = State.players.length;
         State.players.forEach(p => {
@@ -581,80 +570,36 @@ const UI = {
             l.appendChild(d);
         });
     },
-    
-    updateBoard() {
-        // Sort by Score
-        const sorted = [...State.players].sort((a,b) => b.score - a.score);
-        
-        const renderCard = (p) => `
-            <div class="p-card" id="card-${p.id}">
-                <div class="p-avatar" style="color:${p.color}">${p.name[0]}</div>
-                <div class="p-info">
-                    <div class="p-name">${p.name}</div>
-                    <div class="p-stats">
-                        <span class="p-badge">L${p.lvl}</span>
-                        <span>${p.score} PTS</span>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        el('liveLeaderboard').innerHTML = sorted.map(renderCard).join('');
-        
-        // Mobile (Horizontal)
-        if(window.innerWidth <= 768) {
-            el('mobileStats').innerHTML = sorted.map(renderCard).join('');
-            el('mobileStats').style.display = 'flex';
-        }
-    },
-
-    highlightCard(id) {
-        document.querySelectorAll('.p-card').forEach(c => c.classList.remove('active'));
-        const c = el('card-'+id);
-        if(c) {
-            c.classList.add('active');
-            c.scrollIntoView({behavior:'smooth', block:'center'});
-        }
-    },
-
     log(msg) {
         const d = document.createElement('div');
-        d.className = 'log-item';
-        // Time HH:MM
+        d.className = 'log-entry';
         const t = new Date().toTimeString().substr(0,5);
-        d.innerHTML = `<span style="color:#666">[${t}]</span> ${msg}`;
+        d.innerHTML = `<span style="color:#666;font-size:10px;">${t}</span> ${msg}`;
         el('gameLog').prepend(d);
     }
 };
 
 // --- Storage ---
 const Storage = {
-    save() {
-        localStorage.setItem('neonverse_v3', JSON.stringify({ p: State.players, s: State.settings, qt: State.qT, qd: State.qD }));
-        this.cnt();
-    },
+    save() { localStorage.setItem('neonverse_v4', JSON.stringify({ p: State.players, s: State.settings, qt: State.qT, qd: State.qD })); this.cnt(); },
     load() {
-        const d = JSON.parse(localStorage.getItem('neonverse_v3'));
+        const d = JSON.parse(localStorage.getItem('neonverse_v4'));
         if(d) {
-            State.players = d.p || []; State.settings = d.s || {auto:false};
-            State.qT = d.qt || []; State.qD = d.qd || [];
+            State.players = d.p||[]; State.settings = d.s||{auto:false};
+            State.qT = d.qt||[]; State.qD = d.qd||[];
             el('checkAuto').checked = State.settings.auto;
-            UI.updateSetup(); UI.updateBoard(); Wheel.draw();
-            this.cnt();
+            el('autoBadge').classList.toggle('hidden', !State.settings.auto);
+            UI.update(); Wheel.draw(); this.cnt();
         }
     },
-    cnt() {
-        el('cntT').innerText = State.qT.length;
-        el('cntD').innerText = State.qD.length;
-    },
+    cnt() { el('cntT').innerText = State.qT.length; el('cntD').innerText = State.qD.length; },
     read(inp, type) {
-        const f = inp.files[0];
-        if(!f) return;
+        const f = inp.files[0]; if(!f)return;
         const r = new FileReader();
         r.onload = e => {
             const l = e.target.result.split(/\r?\n/).filter(x=>x.trim().length>1);
             if(type==='t') State.qT.push(...l); else State.qD.push(...l);
-            alert('وارد شد: '+l.length); this.save();
+            alert(`اضافه شد: ${l.length}`); this.save();
         };
         r.readAsText(f);
     }
@@ -663,19 +608,21 @@ const Storage = {
 // --- Init ---
 window.onload = () => {
     Storage.load();
-    lucide.createIcons();
-    
     el('btnAdd').onclick = () => { const i = el('inpName'); Game.add(i.value); i.value=''; };
-    el('btnStart').onclick = () => { el('viewSetup').classList.remove('active'); el('viewGame').classList.add('active'); UI.updateBoard(); Wheel.draw(); };
-    el('btnExit').onclick = () => { el('viewGame').classList.remove('active'); el('viewSetup').classList.add('active'); };
+    el('btnStart').onclick = () => { el('viewSetup').classList.remove('active'); el('viewGame').classList.add('active'); Wheel.draw(); };
+    el('btnBack').onclick = () => { el('viewGame').classList.remove('active'); el('viewSetup').classList.add('active'); };
     el('btnSpin').onclick = () => Game.spin();
     el('resetApp').onclick = () => { if(confirm('پاکسازی؟')) { localStorage.clear(); location.reload(); } };
     
-    el('checkAuto').onchange = e => { State.settings.auto = e.target.checked; Storage.save(); };
+    el('checkAuto').onchange = e => { 
+        State.settings.auto = e.target.checked; 
+        el('autoBadge').classList.toggle('hidden', !State.settings.auto);
+        Storage.save(); 
+    };
     el('fileT').onchange = e => Storage.read(e.target, 't');
     el('fileD').onchange = e => Storage.read(e.target, 'd');
+    el('toggleLog').onclick = () => el('gameSidebar').classList.toggle('open');
     
-    // Responsive Wheel
     window.onresize = () => Wheel.draw();
 };
 </script>
